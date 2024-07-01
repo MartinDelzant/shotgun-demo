@@ -17,6 +17,7 @@ export interface MusicCardProps {
   selected: boolean;
   handleClick: () => void;
   handleDblClick: () => void;
+  handleLikedSong: (liked: boolean) => void;
 }
 
 export default function MusicCard({
@@ -27,7 +28,13 @@ export default function MusicCard({
   selected,
   handleClick,
   handleDblClick,
+  handleLikedSong,
 }: MusicCardProps) {
+  const onFavoriteClick = (e: React.MouseEvent, liked: boolean) => {
+    handleLikedSong(liked);
+    e.stopPropagation();
+  };
+
   return (
     <Card
       sx={{
@@ -55,9 +62,15 @@ export default function MusicCard({
         </CardContent>
       </Box>
       {liked ? (
-        <FavoriteIcon sx={{ mr: 2, width: 28, height: 28 }} />
+        <FavoriteIcon
+          onClick={(e) => onFavoriteClick(e, false)}
+          sx={{ mr: 2, width: 28, height: 28 }}
+        />
       ) : (
-        <FavoriteBorderIcon sx={{ mr: 2, width: 28, height: 28 }} />
+        <FavoriteBorderIcon
+          onClick={(e) => onFavoriteClick(e, true)}
+          sx={{ mr: 2, width: 28, height: 28 }}
+        />
       )}
     </Card>
   );

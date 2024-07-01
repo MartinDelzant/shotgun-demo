@@ -10,15 +10,14 @@ import { Track } from "@/lib/db";
 
 export interface PlayerProps {
   track?: Track;
-  liked: boolean;
+  onLikeClicked: (liked: boolean) => void;
 }
 
-export default function Player({ track, liked }: PlayerProps) {
+export default function Player({ track, onLikeClicked }: PlayerProps) {
   const trackName = track?.name || "Double click to play a song";
   const trackImageUrl =
     track?.image_url ||
     "https://www.creativefabrica.com/wp-content/uploads/2019/12/22/song-glyph-icon-vector-Graphics-1.jpg";
-  const artistNames = track?.artists?.map((a) => a.name);
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", maxHeight: 80 }}>
@@ -34,15 +33,21 @@ export default function Player({ track, liked }: PlayerProps) {
             {trackName || "Double click to play a song"}
           </Typography>
           <Typography color="text.secondary" component="div">
-            {artistNames?.join(", ")}
+            {track?.artists?.join(", ")}
           </Typography>
         </CardContent>
       </Box>
       {track ? (
-        liked ? (
-          <FavoriteIcon sx={{ mr: 2, width: 28, height: 28 }} />
+        track.liked ? (
+          <FavoriteIcon
+            onClick={() => onLikeClicked(false)}
+            sx={{ mr: 2, width: 28, height: 28 }}
+          />
         ) : (
-          <FavoriteBorderIcon sx={{ mr: 2, width: 28, height: 28 }} />
+          <FavoriteBorderIcon
+            onClick={() => onLikeClicked(true)}
+            sx={{ mr: 2, width: 28, height: 28 }}
+          />
         )
       ) : (
         <></>

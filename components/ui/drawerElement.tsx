@@ -8,6 +8,7 @@ import {
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
+import { QueryStringParamNames } from "@/lib/searchParams";
 
 export interface DrawerElementProps {
   text: string;
@@ -28,7 +29,7 @@ export default function DrawerElement({
   const onClick = () => {
     if (selected) return;
     const updatedSearchParams = new URLSearchParams(searchParams);
-    updatedSearchParams.set("selectedTab", target);
+    updatedSearchParams.set(QueryStringParamNames.SelectedTab, target);
 
     startTransition(() => {
       router.replace(`${pathname}?${updatedSearchParams.toString()}`);

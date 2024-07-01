@@ -1,54 +1,35 @@
-import "server-only";
-
-export type Artist = {
-  id: number;
-  name: string;
-};
+"use server";
+import { sql } from "@vercel/postgres";
+import { revalidatePath } from "next/cache";
 
 export type Track = {
-  id: number;
+  id: string;
   name: string;
   duration_ms: number;
   image_url: string;
-  artists: Artist[];
+  artists: string[];
+  liked: boolean;
 };
 
-export async function getTracks(
-  likedSongsOnly: boolean = false
-): Promise<Track[]> {
-  const result = [
-    {
-      id: 0,
-      name: "Coucou",
-      image_url: "https://mui.com/static/images/cards/live-from-space.jpg",
-      artists: [
-        {
-          id: 0,
-          name: "Artist1",
-        },
-      ],
-      duration_ms: 120,
-    },
-    {
-      id: 1,
-      name: "Coucou",
-      image_url: "https://mui.com/static/images/cards/live-from-space.jpg",
-      artists: [
-        {
-          id: 1,
-          name: "Artist2",
-        },
-        {
-          id: 0,
-          name: "Artist1",
-        },
-      ],
-      duration_ms: 240,
-    },
-  ];
-  if (likedSongsOnly) return [result[1], result[0]];
-  for (let i = 0; i < 20; i++) {
-    result.push(result[i % 2]);
+export async function getTracks(): Promise<Track[]> {
+  const sqlResult = await sql`
+  SELECT t.id, t.name, t.duration_ms, t.image_url, array_agg(a.name) as artists, utl.track_id IS NOT NULL as liked
+  FROM tracks t
+  LEFT OUTER JOIN track_artists ta ON t.id = ta.track_id
+  LEFT OUTER JOIN artists a ON a.id = ta.artist_id
+  LEFT OUTER JOIN user_track_likes utl on utl.track_id = t.id
+  GROUP BY t.id, t.name, t.duration_ms, t.image_url, utl.track_id`;
+
+  return sqlResult.rows as any;
+}
+
+export async function likeSong(track_id: string | undefined, liked: boolean) {
+  if (!track_id) return;
+
+  if (liked) {
+    await sql`INSERT INTO user_track_likes (track_id, user_id) VALUES (${track_id}, '0');`;
+  } else {
+    await sql`DELETE FROM user_track_likes WHERE track_id=${track_id}`;
   }
-  return result;
+  revalidatePath("/");
 }

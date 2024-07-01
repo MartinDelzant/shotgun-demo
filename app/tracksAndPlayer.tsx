@@ -3,30 +3,26 @@
 import { DRAWER_WIDTH } from "@/components/ui/leftNavigation";
 import MusicCard from "@/components/ui/musicCard";
 import Player from "@/components/ui/player";
-import { Track } from "@/lib/db";
+import { Track, likeSong } from "@/lib/db";
 import { QueryStringParamNames, QueryStringParams } from "@/lib/searchParams";
 import { Box } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 export interface TracksAndPlayerInterface {
   tracks: Track[];
 }
 
 export default function TracksAndPlayer({ tracks }: TracksAndPlayerInterface) {
-  const [selectedTrack, setSelectedTrack] = useState<number | null>(null);
+  const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const playingTrackIdStr = searchParams.get(
-    QueryStringParamNames.PlayingTrackId
-  );
-  const playingTrackId = playingTrackIdStr ? parseInt(playingTrackIdStr) : null;
+  const playingTrackId = searchParams.get(QueryStringParamNames.PlayingTrackId);
   const [isPending, startTransition] = useTransition();
 
-  const onDblClick = (trackId: number) => {
+  const onDblClick = (trackId: string) => {
     if (playingTrackId && playingTrackId === trackId) return;
-    console.log("dblClick", trackId);
     const updatedSearchParams = new URLSearchParams(searchParams);
     updatedSearchParams.set("playingTrackId", trackId + "");
 
@@ -51,13 +47,13 @@ export default function TracksAndPlayer({ tracks }: TracksAndPlayerInterface) {
           height: "calc(100vh - 80px - 64px)",
         }}
       >
-        {tracks.map((t, i) => (
+        {tracks.map((t) => (
           <MusicCard
             trackName={t.name}
-            artistNames={t.artists.map((a) => a.name)}
+            artistNames={t.artists}
             trackImageUrl={t.image_url}
-            liked={false}
-            key={i}
+            liked={t.liked}
+            key={t.id}
             selected={t.id === selectedTrack}
             handleClick={() => {
               setSelectedTrack(t.id);
@@ -65,6 +61,7 @@ export default function TracksAndPlayer({ tracks }: TracksAndPlayerInterface) {
             handleDblClick={() => {
               onDblClick(t.id);
             }}
+            handleLikedSong={(liked) => likeSong(t.id, liked)}
           ></MusicCard>
         ))}
       </Box>
@@ -80,7 +77,10 @@ export default function TracksAndPlayer({ tracks }: TracksAndPlayerInterface) {
           boxShadow: "0px -5px 7px 0px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <Player track={playingTrack} liked={false}></Player>
+        <Player
+          track={playingTrack}
+          onLikeClicked={(liked) => likeSong(playingTrack?.id, liked)}
+        ></Player>
       </Box>
     </>
   );
