@@ -43,6 +43,7 @@ export default function MusicCard({
         maxHeight: 80,
         bgcolor: selected ? "primary.light" : null,
         cursor: "pointer",
+        mb: 1,
       }}
       onClick={handleClick}
       onDoubleClick={handleDblClick}

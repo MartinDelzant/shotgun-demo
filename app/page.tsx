@@ -5,9 +5,8 @@ import TracksAndPlayer from "./tracksAndPlayer";
 import { QueryStringParams, TabTarget } from "@/lib/searchParams";
 
 export default async function Home({ searchParams }: QueryStringParams) {
-  const likedSongsOnly = searchParams?.selectedTab === TabTarget.Liked;
+  const likedTracksOnly = searchParams?.selectedTab === TabTarget.Liked;
   const allTracks = await getTracks();
-  const tracks = likedSongsOnly ? allTracks.filter((t) => t.liked) : allTracks;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -19,17 +18,20 @@ export default async function Home({ searchParams }: QueryStringParams) {
             <DrawerElement
               text={`Tracks (${allTracks.length})`}
               target={TabTarget.All}
-              selected={!likedSongsOnly}
+              selected={!likedTracksOnly}
             ></DrawerElement>
             <DrawerElement
               text={`Likes (${allTracks.filter((t) => t.liked).length})`}
               target={TabTarget.Liked}
-              selected={!!likedSongsOnly}
+              selected={!!likedTracksOnly}
             ></DrawerElement>
           </>
         }
       >
-        <TracksAndPlayer tracks={tracks}></TracksAndPlayer>
+        <TracksAndPlayer
+          allTracks={allTracks}
+          likedTracksOnly={likedTracksOnly}
+        ></TracksAndPlayer>
       </LeftNav>
     </main>
   );

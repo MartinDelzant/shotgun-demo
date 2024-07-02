@@ -10,10 +10,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
 export interface TracksAndPlayerInterface {
-  tracks: Track[];
+  allTracks: Track[];
+  likedTracksOnly: boolean;
 }
 
-export default function TracksAndPlayer({ tracks }: TracksAndPlayerInterface) {
+export default function TracksAndPlayer({
+  allTracks,
+  likedTracksOnly,
+}: TracksAndPlayerInterface) {
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -31,7 +35,8 @@ export default function TracksAndPlayer({ tracks }: TracksAndPlayerInterface) {
     });
   };
 
-  const playingTrack = tracks?.find((t) => t.id === playingTrackId);
+  const playingTrack = allTracks?.find((t) => t.id === playingTrackId);
+  const tracks = likedTracksOnly ? allTracks.filter((t) => t.liked) : allTracks;
   // TODO: don't use hardcoded fixed height below.
   // 80px = bottom player
   // 64px = top app bar
@@ -71,8 +76,6 @@ export default function TracksAndPlayer({ tracks }: TracksAndPlayerInterface) {
           bottom: 0,
           bgcolor: "white",
           width: `calc(100% - ${DRAWER_WIDTH}px)`,
-          pl: 2,
-          pr: 2,
           zIndex: "appBar",
           boxShadow: "0px -5px 7px 0px rgba(0, 0, 0, 0.1)",
         }}
